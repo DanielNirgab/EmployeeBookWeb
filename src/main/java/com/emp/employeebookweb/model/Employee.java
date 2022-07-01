@@ -1,14 +1,34 @@
-package com.emp.employeebookweb;
+package com.emp.employeebookweb.model;
 
 import java.util.Objects;
 
 public class Employee {
     private String firstName;
     private String secondName;
+    private int department;
+    private double salary;
 
-    public Employee(String name, String secondName) {
-        this.firstName = name;
+    public Employee(String firstName, String secondName, int department, double salary) {
+        this.firstName = firstName;
         this.secondName = secondName;
+        this.department = department;
+        this.salary = salary;
+    }
+
+    public int getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(int department) {
+        this.department = department;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(double salary) {
+        this.salary = salary;
     }
 
     public String getFirstName() {

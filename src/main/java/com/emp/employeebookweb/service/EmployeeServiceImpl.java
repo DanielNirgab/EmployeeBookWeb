@@ -1,54 +1,75 @@
 package com.emp.employeebookweb.service;
 
-import com.emp.employeebookweb.Employee;
+import com.emp.employeebookweb.exception.EmplFullNameIsIncorrect;
+import com.emp.employeebookweb.model.Employee;
 import com.emp.employeebookweb.exception.EmployeeAlreadyAddedException;
 import com.emp.employeebookweb.exception.EmployeeNotFoundException;
 import com.emp.employeebookweb.exception.EmployeeStorageIsFullException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
 @Service
-public class EmployeeServiceImpl {
-    private static final int LIMIT = 3;
-    private final List<Employee> employees = new ArrayList<>();
+public class EmployeeServiceImpl implements EmployeeService {
+    private static final int LIMIT = 10;
+    private final Map<String, Employee> employees = new HashMap<>();
 
-    public Employee addEmployee(String firstName, String secondName) {
-        Employee employee = new Employee(firstName, secondName);
-        if (employees.contains(employee)) {
+    private String getKey(Employee employee) {
+        return employee.getSecondName();
+    }
+
+    @Override
+    public Employee addEmployee(String firstName, String secondName, int depart, double salary) {
+        Employee employee = new Employee(firstName, secondName, depart, salary);
+        checkEmplFullName(employee);
+        if (employees.containsKey(getKey(employee))) {
             throw new EmployeeAlreadyAddedException();
         }
         if (employees.size() < LIMIT) {
-            employees.add(employee);
+            employees.put(getKey(employee), employee);
         } else {
             throw new EmployeeStorageIsFullException();
         }
         return employee;
     }
 
-    public Employee removeEmployee(String firstName, String secondName) {
-        Employee employee = new Employee(firstName, secondName);
-        if (!employees.contains(employee)) {
+    @Override
+    public Employee removeEmployee(String firstName, String secondName, int depart, double salary) {
+        Employee employee = new Employee(firstName, secondName, depart, salary);
+        String key = getKey(employee);
+        if (!employees.containsKey(key)) {
             throw new EmployeeNotFoundException();
         }
-        employees.remove(employee);
-                return employee;
+        return employees.remove(key);
     }
 
-    public Employee findEmployee(String firstName, String secondName) {
-        Employee employee = new Employee(firstName, secondName);
-        if (!employees.contains(employee)) {
+    @Override
+    public Employee findEmployee(String firstName, String secondName, int depart, double salary) {
+        Employee employee = new Employee(firstName, secondName, depart, salary);
+        String key = getKey(employee);
+        if (!employees.containsKey(key)) {
             throw new EmployeeNotFoundException();
         }
         return employee;
     }
 
-    public List<Employee> getEmployees () {
-        return new ArrayList<>(employees);
+    @Override
+    public List<Employee> getEmployees() {
+        return new ArrayList<>(employees.values());
+    }
+
+    private boolean checkEmplFullName (Employee employee) {
+        if (StringUtils.isAlpha(employee.getFirstName()) && StringUtils.isAlpha(employee.getSecondName())) {
+            employee.setFirstName(employee.getFirstName().toLowerCase(Locale.ROOT));
+            employee.setSecondName(employee.getSecondName().toLowerCase(Locale.ROOT));
+            employee.setFirstName(StringUtils.capitalize(employee.getFirstName()));
+            employee.setSecondName(StringUtils.capitalize(employee.getSecondName()));
+            return true;
+        } else {
+            throw new EmplFullNameIsIncorrect();
+        }
     }
 
 }
