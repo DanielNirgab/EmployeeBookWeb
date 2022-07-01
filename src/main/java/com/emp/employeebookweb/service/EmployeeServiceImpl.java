@@ -1,15 +1,14 @@
 package com.emp.employeebookweb.service;
 
+import com.emp.employeebookweb.exception.EmplFullNameIsIncorrect;
 import com.emp.employeebookweb.model.Employee;
 import com.emp.employeebookweb.exception.EmployeeAlreadyAddedException;
 import com.emp.employeebookweb.exception.EmployeeNotFoundException;
 import com.emp.employeebookweb.exception.EmployeeStorageIsFullException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Service
@@ -24,6 +23,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Employee addEmployee(String firstName, String secondName, int depart, double salary) {
         Employee employee = new Employee(firstName, secondName, depart, salary);
+        checkEmplFullName(employee);
         if (employees.containsKey(getKey(employee))) {
             throw new EmployeeAlreadyAddedException();
         }
@@ -58,6 +58,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public List<Employee> getEmployees() {
         return new ArrayList<>(employees.values());
+    }
+
+    private boolean checkEmplFullName (Employee employee) {
+        if (StringUtils.isAlpha(employee.getFirstName()) && StringUtils.isAlpha(employee.getSecondName())) {
+            employee.setFirstName(employee.getFirstName().toLowerCase(Locale.ROOT));
+            employee.setSecondName(employee.getSecondName().toLowerCase(Locale.ROOT));
+            employee.setFirstName(StringUtils.capitalize(employee.getFirstName()));
+            employee.setSecondName(StringUtils.capitalize(employee.getSecondName()));
+            return true;
+        } else {
+            throw new EmplFullNameIsIncorrect();
+        }
     }
 
 }
